@@ -6,6 +6,7 @@
 #include "ClientConnection.hpp"
 #include "Client.hpp"
 #include "ClientRpcLayer.hpp"
+#include "ClientRpcHelpLayer.hpp"
 #include "DataStorage.hpp"
 
 #include <QLoggingCategory>
@@ -126,6 +127,15 @@ PendingAuthOperation *Backend::signIn()
     return m_authOperation;
 }
 
+PendingOperation *Backend::getDcConfig()
+{
+    if (m_getDcConfigOperation) {
+        return m_getDcConfigOperation;
+    }
+    m_getDcConfigOperation = mainConnection()->rpcLayer()->help()->getConfig();
+    return m_getDcConfigOperation;
+}
+
 Connection *Backend::createConnection()
 {
     Connection *connection = new Connection(this);
@@ -193,6 +203,16 @@ void Backend::setMainConnection(Connection *connection)
             break;
         }
     });
+}
+
+void Backend::onConnectOperationFinished(PendingOperation *operation)
+{
+    if (!operation->isSucceeded()) {
+        return;
+    }
+    if (!m_dataStorage->serverConfiguration().isValid()) {
+        getDcConfig();
+    }
 }
 
 } // Client namespace
