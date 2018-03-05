@@ -130,7 +130,6 @@ Connection *Backend::createConnection()
 {
     Connection *connection = new Connection(this);
     connection->rpcLayer()->setAppInformation(m_appInformation);
-
     TcpTransport *transport = new TcpTransport(connection);
     switch (m_settings->preferedSessionType()) {
     case Settings::SessionType::Default:
