@@ -137,6 +137,9 @@ Connection *Backend::createConnection()
     case Settings::SessionType::Abridged:
         transport->setPreferedSessionType(TcpTransport::Abridged);
         break;
+    case Settings::SessionType::Obfuscated:
+        transport->setPreferedSessionType(TcpTransport::Obfuscated);
+        break;
     }
     connection->setTransport(transport);
     return connection;
