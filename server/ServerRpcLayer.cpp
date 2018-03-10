@@ -3,6 +3,7 @@
 #include "Utils.hpp"
 #include "Debug_p.hpp"
 #include "TelegramServerUser.hpp"
+#include "TLRpcDebug.hpp"
 #include "PendingOperation.hpp"
 #include "RpcProcessingContext.hpp"
 #include "RpcError.hpp"
@@ -40,12 +41,22 @@ void RpcLayer::setLayerVersion(quint32 layer)
 
 User *RpcLayer::getUser() const
 {
-    return m_user;
+    return m_session ? m_session->user() : nullptr;
 }
 
-void RpcLayer::setUser(User *user)
+quint64 RpcLayer::sessionId() const
 {
-    m_user = user;
+    return m_session ? m_session->sessionId : 0;
+}
+
+Session *RpcLayer::session() const
+{
+    return m_session;
+}
+
+void RpcLayer::setSession(Session *session)
+{
+    m_session = session;
 }
 
 void RpcLayer::setRpcFactories(const QVector<RpcOperationFactory *> &rpcFactories)
@@ -87,8 +98,12 @@ bool RpcLayer::processRpcQuery(RpcProcessingContext &context)
             break;
         }
     }
+    if (!op) {
+        qWarning() << Q_FUNC_INFO << requestValue.toString() << "is not processed!";
+        return false;
+    }
     op->startLater();
-    return op;
+    return true;
 }
 
 bool RpcLayer::processInitConnection(RpcProcessingContext &context)
@@ -108,6 +123,16 @@ bool RpcLayer::processInitConnection(RpcProcessingContext &context)
         qWarning() << Q_FUNC_INFO << "Invalid read!";
         return false;
     }
+    if (session()->appInfo) {
+        qWarning() << Q_FUNC_INFO << "The session is already initialized!" << session()->sessionId;
+    } else {
+        session()->appInfo = new CAppInformation(this);
+    }
+    session()->appInfo->setAppId(appId);
+    session()->appInfo->setAppVersion(appVersion);
+    session()->appInfo->setLanguageCode(languageCode);
+    session()->appInfo->setDeviceInfo(deviceInfo);
+    session()->appInfo->setOsInfo(osInfo);
     return processRpcQuery(context);
 }
 
@@ -115,6 +140,7 @@ bool RpcLayer::processInvokeWithLayer(RpcProcessingContext &context)
 {
     quint32 layer = 0; // TLValue::CurrentLayer;
     context.inputStream() >> layer;
+    qDebug() << Q_FUNC_INFO << "InvokeWithLayer" << layer;
 //    context.setLayer(layer);
     return processRpcQuery(context);
 }
@@ -181,13 +207,16 @@ bool RpcLayer::processDecryptedPackage(const QByteArray &decryptedData)
         //            return;
     }
 
-    if (!m_sessionId) {
-        qDebug() << Q_FUNC_INFO << "Assign the client auth key to a session id";
-        m_sessionId = sessionId;
+    if (!m_session) {
+        qWarning() << Q_FUNC_INFO << "Unexpected RPC packet";
+        return false;
     }
 
-    if (m_sessionId != sessionId) {
-        qDebug() << Q_FUNC_INFO << "Unexpected Session Id";
+    if (!m_session->sessionId) {
+        qDebug() << Q_FUNC_INFO << "Assign the client auth key to a session id";
+        m_session->sessionId = sessionId;
+    } else if (m_session->sessionId != sessionId) {
+        qWarning() << Q_FUNC_INFO << "Unexpected Session Id";
         return false;
     }
 
@@ -206,13 +235,18 @@ bool RpcLayer::processDecryptedPackage(const QByteArray &decryptedData)
     }
 
     QByteArray payload = decryptedStream.readAll();
-    processRpcQuery(payload, messageId);
+
+    CTelegramStream innerStream(payload);
+    qWarning() << Q_FUNC_INFO << "Dump RPC";
+    dumpRpc(innerStream);
+
+    const bool result = processRpcQuery(payload, messageId);
 
 #ifdef DEVELOPER_BUILD
     static int packagesCount = 0;
     qDebug() << Q_FUNC_INFO << "Got package" << ++packagesCount << TLValue::firstFromArray(payload);
 #endif
-    return true;
+    return result;
 }
 
 } // Server

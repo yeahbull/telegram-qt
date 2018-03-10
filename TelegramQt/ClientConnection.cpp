@@ -84,6 +84,7 @@ PendingOperation *Connection::connectToDc()
 #endif
 
     if (m_transport->state() != QAbstractSocket::UnconnectedState) {
+        qWarning() << m_transport->state();
         m_transport->disconnectFromHost(); // Ensure that there is no connection
     }
 
