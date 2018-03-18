@@ -16,6 +16,7 @@
  */
 
 #include "DataStorage_p.hpp"
+#include "Debug_p.hpp"
 
 namespace Telegram {
 
@@ -31,8 +32,8 @@ namespace Client {
     \sa AccountStorage
 */
 
-DataStorage::DataStorage(QObject *parent)
-    : QObject(parent)
+DataStorage::DataStorage(QObject *parent) :
+    DataStorage(new DataStoragePrivate(), parent)
 {
 }
 
@@ -46,6 +47,18 @@ void DataStorage::setServerConfiguration(const DcConfiguration &configuration)
 {
     Q_D(DataStorage);
     d->m_serverConfig = configuration;
+}
+
+DataStorage::DataStorage(DataStoragePrivate *d, QObject *parent)
+    : QObject(parent),
+      d_ptr(d)
+{
+    qDebug() << Q_FUNC_INFO << this << d;
+}
+
+InMemoryDataStorage::InMemoryDataStorage(QObject *parent) :
+    DataStorage(parent)
+{
 }
 
 } // Client namespace

@@ -60,6 +60,10 @@ QByteArray aesDecrypt(const QByteArray &data, const SAesKey &key);
 QByteArray aesEncrypt(const QByteArray &data, const SAesKey &key);
 QByteArray unpackGZip(const QByteArray &data);
 
+using RandomizeBytesMethodPtr = int (*)(void *buffer, int count);
+
+RandomizeBytesMethodPtr setRandomImplementation(RandomizeBytesMethodPtr method);
+
 }
 
 inline int Utils::randomBytes(QByteArray *array)

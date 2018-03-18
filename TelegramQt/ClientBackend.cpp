@@ -12,6 +12,9 @@
 #include <QLoggingCategory>
 #include <QTimer>
 
+#include "TLTypesDebug.hpp"
+#include "Debug_p.hpp"
+
 namespace Telegram {
 
 namespace Client {
@@ -51,7 +54,9 @@ PendingOperation *Backend::connectToServer()
         m_mainConnection->setAuthKey(QByteArray());
     }
     m_mainConnection->setServerRsaKey(m_settings->serverRsaKey());
-    return m_mainConnection->connectToDc();
+    PendingOperation *op = m_mainConnection->connectToDc();
+    connect(op, &PendingOperation::finished, this, &Backend::onConnectOperationFinished);
+    return op;
 }
 
 PendingAuthOperation *Backend::signIn()
@@ -133,6 +138,7 @@ PendingOperation *Backend::getDcConfig()
         return m_getDcConfigOperation;
     }
     m_getDcConfigOperation = mainConnection()->rpcLayer()->help()->getConfig();
+    connect(m_getDcConfigOperation, &PendingOperation::finished, this, &Backend::onGetDcCondigurationFinished);
     return m_getDcConfigOperation;
 }
 
@@ -213,6 +219,16 @@ void Backend::onConnectOperationFinished(PendingOperation *operation)
     if (!m_dataStorage->serverConfiguration().isValid()) {
         getDcConfig();
     }
+}
+
+void Backend::onGetDcCondigurationFinished(PendingOperation *operation)
+{
+    Q_ASSERT(m_getDcConfigOperation == operation);
+
+    TLHelpConfigSimple result;
+    m_mainConnection->rpcLayer()->help()->processReply(m_getDcConfigOperation, &result);
+    qDebug() << result.tlType;
+    qDebug() << result;
 }
 
 } // Client namespace

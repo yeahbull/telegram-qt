@@ -35,6 +35,7 @@
 #include <QDebug>
 
 #include "keys_data.hpp"
+#include "TestRandomGenerator.hpp"
 
 #define CLIENT_WORKS
 
@@ -182,6 +183,8 @@ void tst_all::testClientConnection_data()
 void tst_all::testClientConnection()
 {
     QFETCH(Telegram::Client::Settings::SessionType, sessionType);
+
+    TestRandomDataGenerator testGenerator;
 
     const RsaKey publicKey = Utils::loadRsaKeyFromFile(TestKeyData::publicKeyFileName());
     QVERIFY2(publicKey.isValid(), "Unable to read public RSA key");

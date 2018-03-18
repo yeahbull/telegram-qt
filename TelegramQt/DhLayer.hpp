@@ -110,8 +110,6 @@ protected:
     quint32 m_g;
     QByteArray m_dhPrime;
     QByteArray m_gA;
-    QByteArray m_a; // Server side
-    QByteArray m_b; // Client side
 
     State m_state = State::Idle;
 

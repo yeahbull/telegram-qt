@@ -26,7 +26,7 @@
 #include <QLoggingCategory>
 #include <QtEndian>
 
-Q_LOGGING_CATEGORY(c_clientDhLayerCategory, "telegram.client.dhlayer", QtWarningMsg)
+Q_LOGGING_CATEGORY(c_clientDhLayerCategory, "telegram.client.dhlayer", QtDebugMsg)
 
 namespace Telegram {
 
@@ -44,6 +44,8 @@ namespace Client {
 DhLayer::DhLayer(QObject *parent) :
     BaseDhLayer(parent)
 {
+    m_authRetryId = 0;
+    Utils::randomBytes(m_clientNonce.data, m_clientNonce.size());
 }
 
 void DhLayer::init()
@@ -351,7 +353,9 @@ void DhLayer::generateDh()
 
 PendingRpcOperation *DhLayer::requestDhGenerationResult()
 {
-    qCDebug(c_clientDhLayerCategory) << Q_FUNC_INFO;
+    Q_ASSERT(!m_dhPrime.isEmpty());
+    Q_ASSERT(!m_b.isEmpty());
+    qCDebug(c_clientDhLayerCategory) << Q_FUNC_INFO << m_b;
     CTelegramStream outputStream(CTelegramStream::WriteOnly);
     outputStream << TLValue::SetClientDHParams;
     outputStream << m_clientNonce;

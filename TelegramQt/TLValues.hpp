@@ -923,6 +923,8 @@ public:
         InvokeWithLayer = 0xda9b0d0d,
         InvokeWithoutUpdates = 0xbf9459b7,
         // End of generated TLValues
+
+        HelpGetConfig71 = 65647408,
     };
 
     explicit constexpr TLValue(quint32 i = 0) :

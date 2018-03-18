@@ -133,8 +133,20 @@ static const quint64 s_hardcodedRsaDataFingersprint(0xc3b42b026ce86b21);
 
 namespace Telegram {
 
+static Utils::RandomizeBytesMethodPtr s_randomizeMethod = nullptr;
+
+Utils::RandomizeBytesMethodPtr Utils::setRandomImplementation(RandomizeBytesMethodPtr method)
+{
+    const RandomizeBytesMethodPtr previousMethod = s_randomizeMethod;
+    s_randomizeMethod = method;
+    return previousMethod;
+}
+
 int Utils::randomBytes(void *buffer, int count)
 {
+    if (s_randomizeMethod) {
+        return s_randomizeMethod(buffer, count);
+    }
     return RAND_bytes((unsigned char *) buffer, count);
 }
 
