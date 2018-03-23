@@ -249,6 +249,7 @@ QByteArray CTelegramDispatcher::connectionSecretInfo() const
         qDebug() << Q_FUNC_INFO << "Session data is not available (the main connection has no auth key).";
         return QByteArray();
     }
+    qDebug() << Q_FUNC_INFO << "Secret key id:" << mainConnection()->authId();
 
     QByteArray output;
     CRawStreamEx outputStream(&output, /* write */ true);

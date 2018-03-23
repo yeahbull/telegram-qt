@@ -55,6 +55,8 @@ using namespace Telegram;
 
 static const quint32 s_defaultAuthInterval = 15000; // 15 sec
 
+#define TELEGRAMQT_DEBUG_REVEAL_SECRETS
+
 CTelegramConnection::CTelegramConnection(const CAppInformation *appInfo, QObject *parent) :
     QObject(parent),
     m_status(ConnectionStatusDisconnected),
