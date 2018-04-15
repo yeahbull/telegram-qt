@@ -164,6 +164,13 @@ void PendingAuthOperation::abort()
     qWarning() << Q_FUNC_INFO << "STUB";
 }
 
+PendingOperation *PendingAuthOperation::checkPhoneNumber()
+{
+    PendingRpcOperation *requestCodeOperation = authLayer()->checkPhone(phoneNumber());
+    connect(requestCodeOperation, &PendingRpcOperation::finished, this, &PendingAuthOperation::onCheckPhoneFinished);
+    return requestCodeOperation;
+}
+
 PendingOperation *PendingAuthOperation::requestAuthCode()
 {
     RpcLayer *layer = m_backend->mainConnection()->rpcLayer();
@@ -323,6 +330,20 @@ void PendingAuthOperation::onCheckPasswordFinished(PendingRpcOperation *operatio
     TLAuthAuthorization result;
     authLayer()->processReply(operation, &result);
     qDebug() << result.user.phone << result.user.firstName << result.user.lastName;
+    setFinished();
+}
+
+void PendingAuthOperation::onCheckPhoneFinished(PendingRpcOperation *operation)
+{
+    if (!operation->isSucceeded()) {
+        setDelayedFinishedWithError(operation->errorDetails());
+        return;
+    }
+
+    TLAuthCheckedPhone result;
+    authLayer()->processReply(operation, &result);
+    qDebug() << result.phoneRegistered;
+    emit phoneChecked(result.phoneRegistered ? TelegramNamespace::PhoneCheckStatus::Registered : TelegramNamespace::PhoneCheckStatus::Unregistered);
     setFinished();
 }
 

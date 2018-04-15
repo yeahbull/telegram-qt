@@ -93,6 +93,12 @@ public:
     };
     Q_ENUM(ContactStatus)
 
+    enum PhoneCheckStatus {
+        Registered,
+        Unregistered,
+    };
+    Q_ENUM(PhoneCheckStatus)
+
     enum MessageFlag {
         MessageFlagNone      = 0x0,
         MessageFlagRead      = 0x1, // Message was read

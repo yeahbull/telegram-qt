@@ -240,7 +240,7 @@ public Q_SLOTS:
     // Low-level methods (needed mostly for debug and testing)
     PendingOperation *connectToServer(); // Establish low-level TCP connection
 //    void disconnectFromServer();
-//    PendingAuthOperation *checkPhoneNumber();
+    PendingAuthOperation *checkPhoneNumber(const QString &phoneNumber);
     PendingAuthOperation *signIn();
 
 //    void resetConnectionData();

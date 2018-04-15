@@ -35,6 +35,7 @@ public:
 
     PendingOperation *connectToServer();
     PendingAuthOperation *signIn();
+    PendingAuthOperation *checkPhoneNumber(const QString &phoneNumber);
     PendingOperation *getDcConfig();
 
     Connection *createConnection();

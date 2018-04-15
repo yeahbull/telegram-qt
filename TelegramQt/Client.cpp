@@ -92,6 +92,12 @@ PendingOperation *Client::connectToServer()
     return d->connectToServer();
 }
 
+PendingAuthOperation *Client::checkPhoneNumber(const QString &phoneNumber)
+{
+    Q_D(Client);
+    return d->checkPhoneNumber(phoneNumber);
+}
+
 //void Client::setAppInformation(AppInformation *newAppInfo)
 //{
 //    d->m_appInformation = newAppInfo;

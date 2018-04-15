@@ -132,6 +132,37 @@ PendingAuthOperation *Backend::signIn()
     return m_authOperation;
 }
 
+PendingAuthOperation *Backend::checkPhoneNumber(const QString &phoneNumber)
+{
+    if (!m_authOperation) {
+        m_authOperation = new PendingAuthOperation(this);
+    }
+
+    if (m_signedIn) {
+        m_authOperation->setDelayedFinishedWithError({
+                                                       { QStringLiteral("text"), QStringLiteral("Already signed in") }
+                                                   });
+        return m_authOperation;
+    }
+    if (!m_settings || !m_settings->isValid()) {
+        qWarning() << "Invalid settings";
+        m_authOperation->setDelayedFinishedWithError({
+                                                       { QStringLiteral("text"), QStringLiteral("Invalid settings") }
+                                                   });
+        return m_authOperation;
+    }
+    m_authOperation->setBackend(this);
+    m_authOperation->setPhoneNumber(phoneNumber);
+
+    if (!mainConnection() || (mainConnection()->status() != Connection::Status::Authenticated)) {
+        m_authOperation->runAfter(connectToServer());
+        return m_authOperation;
+    }
+    m_authOperation->setRunMethod(&PendingAuthOperation::checkPhoneNumber);
+    m_authOperation->startLater();
+    return m_authOperation;
+}
+
 PendingOperation *Backend::getDcConfig()
 {
     if (m_getDcConfigOperation) {

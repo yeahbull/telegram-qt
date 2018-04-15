@@ -122,6 +122,7 @@ public slots:
 
     void abort();
 
+    PendingOperation *checkPhoneNumber();
     PendingOperation *requestAuthCode();
     PendingOperation *submitAuthCode(const QString &code);
     PendingOperation *getPassword();
@@ -132,6 +133,7 @@ public slots:
     void recovery();
 
 Q_SIGNALS:
+    void phoneChecked(TelegramNamespace::PhoneCheckStatus status);
     void phoneNumberRequired();
     void authCodeRequired();
     void passwordRequired();
@@ -163,6 +165,7 @@ protected:
     void onSignInFinished(PendingRpcOperation *operation);
     void onPasswordRequestFinished(PendingRpcOperation *operation);
     void onCheckPasswordFinished(PendingRpcOperation *operation);
+    void onCheckPhoneFinished(PendingRpcOperation *operation);
 
     QString m_authCodeHash;
 };
